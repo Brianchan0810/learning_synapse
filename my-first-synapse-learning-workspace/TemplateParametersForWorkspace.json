@@ -1,0 +1,21 @@
+{
+	"$schema": "https://schema.management.azure.com/schemas/2015-01-01/deploymentParameters.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"value": "my-first-synapse-learning-workspace"
+		},
+		"ls_another_datalake_accountKey": {
+			"value": ""
+		},
+		"my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer_connectionString": {
+			"value": ""
+		},
+		"ls_another_datalake_properties_typeProperties_url": {
+			"value": "https://learningazurestorageac.dfs.core.windows.net/"
+		},
+		"my-first-synapse-learning-workspace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"value": "https://datalakeforlearningasa.dfs.core.windows.net"
+		}
+	}
+}

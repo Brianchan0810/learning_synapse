@@ -1,0 +1,1256 @@
+{
+	"$schema": "http://schema.management.azure.com/schemas/2015-01-01/deploymentTemplate.json#",
+	"contentVersion": "1.0.0.0",
+	"parameters": {
+		"workspaceName": {
+			"type": "string",
+			"metadata": "Workspace name",
+			"defaultValue": "my-first-synapse-learning-workspace"
+		},
+		"ls_another_datalake_accountKey": {
+			"type": "secureString",
+			"metadata": "Secure string for 'accountKey' of 'ls_another_datalake'"
+		},
+		"my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer_connectionString": {
+			"type": "secureString",
+			"metadata": "Secure string for 'connectionString' of 'my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer'"
+		},
+		"ls_another_datalake_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://learningazurestorageac.dfs.core.windows.net/"
+		},
+		"my-first-synapse-learning-workspace-WorkspaceDefaultStorage_properties_typeProperties_url": {
+			"type": "string",
+			"defaultValue": "https://datalakeforlearningasa.dfs.core.windows.net"
+		}
+	},
+	"variables": {
+		"workspaceId": "[concat('Microsoft.Synapse/workspaces/', parameters('workspaceName'))]"
+	},
+	"resources": [
+		{
+			"name": "[concat(parameters('workspaceName'), '/ETL job 1')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "DataFlow ETL",
+						"type": "ExecuteDataFlow",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"dataflow": {
+								"referenceName": "ExtractFromDataLakeLoadToSQLpool",
+								"type": "DataFlowReference",
+								"parameters": {},
+								"datasetParameters": {
+									"ContractDataset": {},
+									"PersonalInfoDataset": {},
+									"sink1": {}
+								}
+							},
+							"staging": {
+								"linkedService": {
+									"referenceName": "my-first-synapse-learning-workspace-WorkspaceDefaultStorage",
+									"type": "LinkedServiceReference"
+								},
+								"folderPath": "users/staging"
+							},
+							"compute": {
+								"coreCount": 8,
+								"computeType": "General"
+							},
+							"traceLevel": "Fine"
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-23T10:16:56Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/dataflows/ExtractFromDataLakeLoadToSQLpool')]",
+				"[concat(variables('workspaceId'), '/linkedServices/my-first-synapse-learning-workspace-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Load SQLPool to DataLake')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Wait1",
+						"type": "Wait",
+						"dependsOn": [],
+						"userProperties": [],
+						"typeProperties": {
+							"waitTimeInSeconds": 1
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-23T10:18:36Z"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/PauseResume')]",
+			"type": "Microsoft.Synapse/workspaces/pipelines",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"activities": [
+					{
+						"name": "Get SQL Pool List",
+						"type": "WebActivity",
+						"dependsOn": [],
+						"policy": {
+							"timeout": "0.12:00:00",
+							"retry": 0,
+							"retryIntervalInSeconds": 30,
+							"secureOutput": false,
+							"secureInput": false
+						},
+						"userProperties": [],
+						"typeProperties": {
+							"url": {
+								"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools?api-version=2019-06-01-preview')",
+								"type": "Expression"
+							},
+							"connectVia": {
+								"referenceName": "AutoResolveIntegrationRuntime",
+								"type": "IntegrationRuntimeReference"
+							},
+							"method": "GET",
+							"headers": {},
+							"authentication": {
+								"type": "MSI",
+								"resource": "https://management.azure.com/"
+							}
+						}
+					},
+					{
+						"name": "Filter SQL pool",
+						"type": "Filter",
+						"dependsOn": [
+							{
+								"activity": "Get SQL Pool List",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Get SQL Pool List').output.value",
+								"type": "Expression"
+							},
+							"condition": {
+								"value": "@not(endswith(item().name,'prod'))",
+								"type": "Expression"
+							}
+						}
+					},
+					{
+						"name": "ForEach1",
+						"type": "ForEach",
+						"dependsOn": [
+							{
+								"activity": "Filter SQL pool",
+								"dependencyConditions": [
+									"Succeeded"
+								]
+							}
+						],
+						"userProperties": [],
+						"typeProperties": {
+							"items": {
+								"value": "@activity('Filter SQL pool').output.value",
+								"type": "Expression"
+							},
+							"isSequential": false,
+							"activities": [
+								{
+									"name": "CheckState",
+									"type": "WebActivity",
+									"dependsOn": [],
+									"policy": {
+										"timeout": "0.12:00:00",
+										"retry": 0,
+										"retryIntervalInSeconds": 30,
+										"secureOutput": false,
+										"secureInput": false
+									},
+									"userProperties": [],
+									"typeProperties": {
+										"url": {
+											"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',item().name,'?api-version=2019-06-01-preview')",
+											"type": "Expression"
+										},
+										"connectVia": {
+											"referenceName": "AutoResolveIntegrationRuntime",
+											"type": "IntegrationRuntimeReference"
+										},
+										"method": "GET",
+										"headers": {},
+										"authentication": {
+											"type": "MSI",
+											"resource": "https://management.azure.com/"
+										}
+									}
+								},
+								{
+									"name": "State-PauseOrResume",
+									"type": "Switch",
+									"dependsOn": [
+										{
+											"activity": "CheckState",
+											"dependencyConditions": [
+												"Succeeded"
+											]
+										}
+									],
+									"userProperties": [],
+									"typeProperties": {
+										"on": {
+											"value": "@concat(activity('CheckState').output.properties.status,'-',pipeline().parameters.PauseOrResume)",
+											"type": "Expression"
+										},
+										"cases": [
+											{
+												"value": "Paused-Resume",
+												"activities": [
+													{
+														"name": "SQLPoolResume",
+														"type": "WebActivity",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"url": {
+																"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',activity('CheckState').output.name,'/resume?api-version=2019-06-01-preview')",
+																"type": "Expression"
+															},
+															"connectVia": {
+																"referenceName": "AutoResolveIntegrationRuntime",
+																"type": "IntegrationRuntimeReference"
+															},
+															"method": "POST",
+															"headers": {},
+															"body": "Pause and Resume",
+															"authentication": {
+																"type": "MSI",
+																"resource": "https://management.azure.com/"
+															}
+														}
+													}
+												]
+											},
+											{
+												"value": "Online-Pause",
+												"activities": [
+													{
+														"name": "SQLPoolPause",
+														"type": "WebActivity",
+														"dependsOn": [],
+														"policy": {
+															"timeout": "0.12:00:00",
+															"retry": 0,
+															"retryIntervalInSeconds": 30,
+															"secureOutput": false,
+															"secureInput": false
+														},
+														"userProperties": [],
+														"typeProperties": {
+															"url": {
+																"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',activity('CheckState').output.name,'/pause?api-version=2019-06-01-preview')",
+																"type": "Expression"
+															},
+															"connectVia": {
+																"referenceName": "AutoResolveIntegrationRuntime",
+																"type": "IntegrationRuntimeReference"
+															},
+															"method": "POST",
+															"headers": {},
+															"body": "Pause and Resume",
+															"authentication": {
+																"type": "MSI",
+																"resource": "https://management.azure.com/"
+															}
+														}
+													}
+												]
+											}
+										]
+									}
+								}
+							]
+						}
+					}
+				],
+				"policy": {
+					"elapsedTimeMetric": {},
+					"cancelAfter": {}
+				},
+				"parameters": {
+					"ResourceGroup": {
+						"type": "string",
+						"defaultValue": "learningsynapseresourcegrp"
+					},
+					"SubscriptionID": {
+						"type": "string",
+						"defaultValue": "ef6d64e9-c558-4834-b4c6-00d1f4906fb5"
+					},
+					"WorkspaceName": {
+						"type": "string",
+						"defaultValue": "my-first-synapse-learning-workspace"
+					},
+					"SQLPoolName": {
+						"type": "string",
+						"defaultValue": "DedicatedPool1"
+					},
+					"PauseorResume": {
+						"type": "string",
+						"defaultValue": "Pause"
+					}
+				},
+				"annotations": [],
+				"lastPublishTime": "2022-11-23T10:02:42Z"
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Contract_dataset')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "ls_another_datalake",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "contracts.parquet",
+						"fileSystem": "employees"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "contract_no",
+						"type": "UTF8"
+					},
+					{
+						"name": "account_no",
+						"type": "UTF8"
+					},
+					{
+						"name": "phone_no",
+						"type": "INT64"
+					},
+					{
+						"name": "plan_type",
+						"type": "UTF8"
+					},
+					{
+						"name": "plan_id",
+						"type": "UTF8"
+					},
+					{
+						"name": "handset_model",
+						"type": "UTF8"
+					},
+					{
+						"name": "voucher_amount",
+						"type": "DOUBLE"
+					},
+					{
+						"name": "duration",
+						"type": "INT64"
+					},
+					{
+						"name": "contract_start_date",
+						"type": "TIMESTAMP_MICROS"
+					},
+					{
+						"name": "contract_end_date",
+						"type": "TIMESTAMP_MICROS"
+					},
+					{
+						"name": "monthly_charge",
+						"type": "INT64"
+					},
+					{
+						"name": "voice_cap",
+						"type": "INT64"
+					},
+					{
+						"name": "data_cap",
+						"type": "INT64"
+					},
+					{
+						"name": "data_speed",
+						"type": "UTF8"
+					},
+					{
+						"name": "agent_name",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/ls_another_datalake')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPool1_CustomerTable')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer",
+					"type": "LinkedServiceReference",
+					"parameters": {
+						"DBName": "DedicatedPool1"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDWTable",
+				"schema": [
+					{
+						"name": "contract_no",
+						"type": "nvarchar"
+					},
+					{
+						"name": "account_no",
+						"type": "nvarchar"
+					},
+					{
+						"name": "last_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "first_name",
+						"type": "nvarchar"
+					},
+					{
+						"name": "gender",
+						"type": "nvarchar"
+					},
+					{
+						"name": "phone_no",
+						"type": "decimal",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "hkid",
+						"type": "nvarchar"
+					},
+					{
+						"name": "duration",
+						"type": "decimal",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "monthly_charge",
+						"type": "decimal",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "voucher_amount",
+						"type": "decimal",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "contract_sum",
+						"type": "decimal",
+						"precision": 19,
+						"scale": 4
+					},
+					{
+						"name": "gender_totalsum_rank",
+						"type": "int",
+						"precision": 10
+					}
+				],
+				"typeProperties": {
+					"schema": "dbo",
+					"table": "Customer"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Personal_info_dataset')]",
+			"type": "Microsoft.Synapse/workspaces/datasets",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"linkedServiceName": {
+					"referenceName": "my-first-synapse-learning-workspace-WorkspaceDefaultStorage",
+					"type": "LinkedServiceReference"
+				},
+				"annotations": [],
+				"type": "Parquet",
+				"typeProperties": {
+					"location": {
+						"type": "AzureBlobFSLocation",
+						"fileName": "personal_info.parquet",
+						"fileSystem": "users"
+					},
+					"compressionCodec": "snappy"
+				},
+				"schema": [
+					{
+						"name": "account_no",
+						"type": "UTF8"
+					},
+					{
+						"name": "last_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "first_name",
+						"type": "UTF8"
+					},
+					{
+						"name": "hkid",
+						"type": "UTF8"
+					},
+					{
+						"name": "contact_no",
+						"type": "INT64"
+					},
+					{
+						"name": "date_of_birth",
+						"type": "TIMESTAMP_MICROS"
+					},
+					{
+						"name": "gender",
+						"type": "UTF8"
+					},
+					{
+						"name": "email",
+						"type": "UTF8"
+					},
+					{
+						"name": "mail_district",
+						"type": "UTF8"
+					},
+					{
+						"name": "home_address",
+						"type": "UTF8"
+					},
+					{
+						"name": "work_address",
+						"type": "UTF8"
+					},
+					{
+						"name": "industry",
+						"type": "UTF8"
+					}
+				]
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/linkedServices/my-first-synapse-learning-workspace-WorkspaceDefaultStorage')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ls_another_datalake')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('ls_another_datalake_properties_typeProperties_url')]",
+					"accountKey": {
+						"type": "SecureString",
+						"value": "[parameters('ls_another_datalake_accountKey')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"parameters": {
+					"DBName": {
+						"type": "String"
+					}
+				},
+				"annotations": [],
+				"type": "AzureSqlDW",
+				"typeProperties": {
+					"connectionString": "[parameters('my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer_connectionString')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/my-first-synapse-learning-workspace-WorkspaceDefaultStorage')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureBlobFS",
+				"typeProperties": {
+					"url": "[parameters('my-first-synapse-learning-workspace-WorkspaceDefaultStorage_properties_typeProperties_url')]"
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
+			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "Managed",
+				"typeProperties": {
+					"computeProperties": {
+						"location": "AutoResolve",
+						"dataFlowProperties": {
+							"computeType": "General",
+							"coreCount": 8,
+							"timeToLive": 0
+						}
+					}
+				}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/ExtractFromDataLakeLoadToSQLpool')]",
+			"type": "Microsoft.Synapse/workspaces/dataflows",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "MappingDataFlow",
+				"typeProperties": {
+					"sources": [
+						{
+							"dataset": {
+								"referenceName": "Contract_dataset",
+								"type": "DatasetReference"
+							},
+							"name": "ContractDataset"
+						},
+						{
+							"dataset": {
+								"referenceName": "Personal_info_dataset",
+								"type": "DatasetReference"
+							},
+							"name": "PersonalInfoDataset"
+						}
+					],
+					"sinks": [
+						{
+							"dataset": {
+								"referenceName": "DedicatedPool1_CustomerTable",
+								"type": "DatasetReference"
+							},
+							"name": "sink1"
+						}
+					],
+					"transformations": [
+						{
+							"name": "ContractJoinPersonal"
+						},
+						{
+							"name": "SelectTargetColumn"
+						},
+						{
+							"name": "ContractSum"
+						},
+						{
+							"name": "GenderContractSumRank"
+						}
+					],
+					"scriptLines": [
+						"source(output(",
+						"          contract_no as string,",
+						"          account_no as string,",
+						"          phone_no as long,",
+						"          plan_type as string,",
+						"          plan_id as string,",
+						"          handset_model as string,",
+						"          voucher_amount as double,",
+						"          duration as long,",
+						"          contract_start_date as timestamp,",
+						"          contract_end_date as timestamp,",
+						"          monthly_charge as long,",
+						"          voice_cap as long,",
+						"          data_cap as long,",
+						"          data_speed as string,",
+						"          agent_name as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> ContractDataset",
+						"source(output(",
+						"          account_no as string,",
+						"          last_name as string,",
+						"          first_name as string,",
+						"          hkid as string,",
+						"          contact_no as long,",
+						"          date_of_birth as timestamp,",
+						"          gender as string,",
+						"          email as string,",
+						"          mail_district as string,",
+						"          home_address as string,",
+						"          work_address as string,",
+						"          industry as string",
+						"     ),",
+						"     allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     ignoreNoFilesFound: false,",
+						"     format: 'parquet') ~> PersonalInfoDataset",
+						"ContractDataset, PersonalInfoDataset join(ContractDataset@account_no == PersonalInfoDataset@account_no,",
+						"     joinType:'inner',",
+						"     matchType:'exact',",
+						"     ignoreSpaces: false,",
+						"     broadcast: 'auto')~> ContractJoinPersonal",
+						"ContractJoinPersonal select(mapColumn(",
+						"          contract_no,",
+						"          account_no = ContractDataset@account_no,",
+						"          last_name,",
+						"          first_name,",
+						"          gender,",
+						"          phone_no,",
+						"          hkid,",
+						"          duration,",
+						"          monthly_charge,",
+						"          voucher_amount",
+						"     ),",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true) ~> SelectTargetColumn",
+						"SelectTargetColumn derive(contract_sum = monthly_charge*duration) ~> ContractSum",
+						"ContractSum window(over(gender),",
+						"     desc(contract_sum, true),",
+						"     gender_TotalSum_Rank = rank()) ~> GenderContractSumRank",
+						"GenderContractSumRank sink(allowSchemaDrift: true,",
+						"     validateSchema: false,",
+						"     input(",
+						"          contract_no as string,",
+						"          account_no as string,",
+						"          last_name as string,",
+						"          first_name as string,",
+						"          gender as string,",
+						"          phone_no as decimal(19,4),",
+						"          hkid as string,",
+						"          duration as decimal(19,4),",
+						"          monthly_charge as decimal(19,4),",
+						"          voucher_amount as decimal(19,4),",
+						"          contract_sum as decimal(19,4),",
+						"          gender_totalsum_rank as integer",
+						"     ),",
+						"     deletable:false,",
+						"     insertable:true,",
+						"     updateable:false,",
+						"     upsertable:false,",
+						"     format: 'table',",
+						"     staged: true,",
+						"     skipDuplicateMapInputs: true,",
+						"     skipDuplicateMapOutputs: true,",
+						"     saveOrder: 1,",
+						"     errorHandlingOption: 'stopOnFirstError',",
+						"     preCommands: [],",
+						"     postCommands: []) ~> sink1"
+					]
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/datasets/Contract_dataset')]",
+				"[concat(variables('workspaceId'), '/datasets/Personal_info_dataset')]",
+				"[concat(variables('workspaceId'), '/datasets/DedicatedPool1_CustomerTable')]"
+			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/WorkspaceSystemIdentity')]",
+			"type": "Microsoft.Synapse/workspaces/credentials",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"type": "ManagedIdentity",
+				"typeProperties": {}
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": "",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "master",
+						"poolName": "Built-in"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQL script 2')]",
+			"type": "Microsoft.Synapse/workspaces/sqlscripts",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"content": {
+					"query": " CREATE TABLE [dbo].[Customer]\n (\n     [contract_no] NVARCHAR(4000),\n     [account_no] NVARCHAR(4000),\n     [last_name] NVARCHAR(4000),\n     [first_name] NVARCHAR(4000),\n     [gender] NVARCHAR(4000),\n     [phone_no] NUMERIC(19,4),\n     [hkid] NVARCHAR(4000),\n     [duration] NUMERIC(19,4),\n     [monthly_charge] NUMERIC(19,4),\n     [voucher_amount] NUMERIC(19,4),\n     [contract_sum]  NUMERIC(19,4),\n     [gender_totalsum_rank] INT\n )\n WITH\n (\n     DISTRIBUTION = HASH ( [contract_no] ),\n     CLUSTERED COLUMNSTORE INDEX\n )",
+					"metadata": {
+						"language": "sql"
+					},
+					"currentConnection": {
+						"databaseName": "DedicatedPool1",
+						"poolName": "DedicatedPool1"
+					},
+					"resultLimit": 5000
+				},
+				"type": "SqlQuery"
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/Notebook 1')]",
+			"type": "Microsoft.Synapse/workspaces/notebooks",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"nbformat": 4,
+				"nbformat_minor": 2,
+				"bigDataPool": {
+					"referenceName": "MySparkPool",
+					"type": "BigDataPoolReference"
+				},
+				"sessionProperties": {
+					"driverMemory": "28g",
+					"driverCores": 4,
+					"executorMemory": "28g",
+					"executorCores": 4,
+					"numExecutors": 2,
+					"runAsWorkspaceSystemIdentity": false,
+					"conf": {
+						"spark.dynamicAllocation.enabled": "false",
+						"spark.dynamicAllocation.minExecutors": "2",
+						"spark.dynamicAllocation.maxExecutors": "2",
+						"spark.autotune.trackingId": "a61c68ee-1cfd-4c6f-958b-3c98c2775428"
+					}
+				},
+				"metadata": {
+					"saveOutput": true,
+					"synapse_widget": {
+						"version": "0.1",
+						"state": {
+							"4abac0a0-4e1e-4b2b-9347-33367f5cb585": {
+								"type": "Synapse.DataFrame",
+								"sync_state": {
+									"table": {
+										"rows": [
+											{
+												"0": "AC0001",
+												"1": "Lam",
+												"2": "Tai Kwang",
+												"3": "P458129(8)",
+												"4": "69517582",
+												"5": "1992-03-12 00:00:00",
+												"6": "M",
+												"7": "Ella810@gmail.com",
+												"8": "Kwai Tsing ",
+												"9": "Home Addr 1",
+												"10": "Work Addr 1",
+												"11": "Education"
+											},
+											{
+												"0": "AC0002",
+												"1": "Chan",
+												"2": "Yiu Ting",
+												"3": "A133397(8)",
+												"4": "68379563",
+												"5": "1952-08-26 00:00:00",
+												"6": "M",
+												"7": "Jack248@gmail.com",
+												"8": "Sha Tin",
+												"9": "Home Addr 2",
+												"10": "Work Addr 2",
+												"11": "Engineering"
+											},
+											{
+												"0": "AC0003",
+												"1": "Wu",
+												"2": "Ka hei",
+												"3": "P211771(9)",
+												"4": "80874823",
+												"5": "1982-11-02 00:00:00",
+												"6": "M",
+												"7": "Grayson564@gmail.com",
+												"8": "Eastern",
+												"9": "Home Addr 3",
+												"10": "Work Addr 3",
+												"11": "Retail"
+											},
+											{
+												"0": "AC0004",
+												"1": "Tsang",
+												"2": "Fong Wang",
+												"3": "X650820(8)",
+												"4": "56859529",
+												"5": "1948-06-13 00:00:00",
+												"6": "F",
+												"7": "Scarlett164@gmail.com",
+												"8": "Wan Chai",
+												"9": "Home Addr 4",
+												"10": "Work Addr 4",
+												"11": "Retired"
+											},
+											{
+												"0": "AC0005",
+												"1": "Ho",
+												"2": "Oi Fai",
+												"3": "A545244(6)",
+												"4": "87093607",
+												"5": "1977-09-26 00:00:00",
+												"6": "M",
+												"7": "Carter125@gmail.com",
+												"8": "Kwai Tsing",
+												"9": "Home Addr 5",
+												"10": "Work Addr 5",
+												"11": "Business"
+											},
+											{
+												"0": "AC0006",
+												"1": "Ng",
+												"2": "Siu Yueng",
+												"3": "B917996(6)",
+												"4": "64225641",
+												"5": "2000-12-03 00:00:00",
+												"6": "F",
+												"7": "Hazel446@gmail.com",
+												"8": "Sham Shui Po",
+												"9": "Home Addr 6",
+												"10": "Work Addr 6",
+												"11": "Student"
+											},
+											{
+												"0": "AC0007",
+												"1": "Lam",
+												"2": "Mei Ching",
+												"3": "Z737392(7)",
+												"4": "85493822",
+												"5": "1993-04-17 00:00:00",
+												"6": "F",
+												"7": "Hudson499@gmail.com",
+												"8": "Central and West",
+												"9": "Home Addr 7",
+												"10": "Work Addr 7",
+												"11": "IT"
+											},
+											{
+												"0": "AC0008",
+												"1": "Tsang",
+												"2": "Ka Ming",
+												"3": "Y717732(2)",
+												"4": "56556296",
+												"5": "1983-06-23 00:00:00",
+												"6": "M",
+												"7": "Willow627@gmail.com",
+												"8": "Eastern",
+												"9": "Home Addr 8",
+												"10": "Work Addr 8",
+												"11": "Engineering"
+											},
+											{
+												"0": "AC0009",
+												"1": "Wu",
+												"2": "Dong Hei",
+												"3": "A140657(1)",
+												"4": "64022282",
+												"5": "1988-02-13 00:00:00",
+												"6": "F",
+												"7": "Madison772@gmail.com",
+												"8": "Sham Shui Po",
+												"9": "Home Addr 9",
+												"10": "Work Addr 9",
+												"11": "IT"
+											},
+											{
+												"0": "AC0010",
+												"1": "Lam",
+												"2": "Shui Sing",
+												"3": "B431844(5)",
+												"4": "70162028",
+												"5": "1963-07-20 00:00:00",
+												"6": "F",
+												"7": "Maverick117@gmail.com",
+												"8": "Eastern",
+												"9": "Home Addr 10",
+												"10": "Work Addr 10",
+												"11": "Education"
+											}
+										],
+										"schema": [
+											{
+												"key": "0",
+												"name": "account_no",
+												"type": "string"
+											},
+											{
+												"key": "1",
+												"name": "last_name",
+												"type": "string"
+											},
+											{
+												"key": "2",
+												"name": "first_name",
+												"type": "string"
+											},
+											{
+												"key": "3",
+												"name": "hkid",
+												"type": "string"
+											},
+											{
+												"key": "4",
+												"name": "contact_no",
+												"type": "bigint"
+											},
+											{
+												"key": "5",
+												"name": "date_of_birth",
+												"type": "timestamp"
+											},
+											{
+												"key": "6",
+												"name": "gender",
+												"type": "string"
+											},
+											{
+												"key": "7",
+												"name": "email",
+												"type": "string"
+											},
+											{
+												"key": "8",
+												"name": "mail_district",
+												"type": "string"
+											},
+											{
+												"key": "9",
+												"name": "home_address",
+												"type": "string"
+											},
+											{
+												"key": "10",
+												"name": "work_address",
+												"type": "string"
+											},
+											{
+												"key": "11",
+												"name": "industry",
+												"type": "string"
+											}
+										],
+										"truncated": false
+									},
+									"isSummary": false,
+									"language": "scala"
+								},
+								"persist_state": {
+									"view": {
+										"type": "details",
+										"chartOptions": {
+											"chartType": "bar",
+											"aggregationType": "sum",
+											"categoryFieldKeys": [
+												"0"
+											],
+											"seriesFieldKeys": [
+												"4"
+											],
+											"isStacked": false
+										}
+									}
+								}
+							}
+						}
+					},
+					"enableDebugMode": false,
+					"kernelspec": {
+						"name": "synapse_pyspark",
+						"display_name": "Synapse PySpark"
+					},
+					"language_info": {
+						"name": "python"
+					},
+					"a365ComputeOptions": {
+						"id": "/subscriptions/ef6d64e9-c558-4834-b4c6-00d1f4906fb5/resourceGroups/learningsynapseresourcegrp/providers/Microsoft.Synapse/workspaces/my-first-synapse-learning-workspace/bigDataPools/MySparkPool",
+						"name": "MySparkPool",
+						"type": "Spark",
+						"endpoint": "https://my-first-synapse-learning-workspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/MySparkPool",
+						"auth": {
+							"type": "AAD",
+							"authResource": "https://dev.azuresynapse.net",
+							"authHeader": null
+						},
+						"sparkVersion": "3.2",
+						"nodeCount": 10,
+						"cores": 4,
+						"memory": 28,
+						"extraHeader": null
+					},
+					"sessionKeepAliveTimeout": 30
+				},
+				"cells": [
+					{
+						"cell_type": "code",
+						"metadata": {
+							"microsoft": {
+								"language": "python"
+							},
+							"collapsed": false
+						},
+						"source": [
+							"%%pyspark\r\n",
+							"df = spark.read.load('abfss://users@datalakeforlearningasa.dfs.core.windows.net/personal_info.parquet', format='parquet')\r\n",
+							"display(df.limit(10))"
+						],
+						"outputs": [],
+						"execution_count": 3
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							"spark.sql(\"CREATE DATABASE IF NOT EXISTS sparkdb\")\r\n",
+							"df.write.mode(\"overwrite\").saveAsTable(\"sparkdb.personalinfo\")"
+						],
+						"outputs": [],
+						"execution_count": 4
+					},
+					{
+						"cell_type": "code",
+						"metadata": {
+							"jupyter": {
+								"source_hidden": false,
+								"outputs_hidden": false
+							},
+							"nteract": {
+								"transient": {
+									"deleting": false
+								}
+							}
+						},
+						"source": [
+							""
+						],
+						"outputs": []
+					}
+				]
+			},
+			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/MySparkPool')]",
+			"type": "Microsoft.Synapse/workspaces/bigDataPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"autoPause": {
+					"enabled": true,
+					"delayInMinutes": 5
+				},
+				"autoScale": {
+					"enabled": true,
+					"maxNodeCount": 3,
+					"minNodeCount": 3
+				},
+				"nodeCount": 10,
+				"nodeSize": "Small",
+				"nodeSizeFamily": "MemoryOptimized",
+				"sparkVersion": "3.2",
+				"isComputeIsolationEnabled": false,
+				"sessionLevelPackagesEnabled": false,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastasia"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPool1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastasia"
+		}
+	]
+}

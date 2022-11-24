@@ -24,6 +24,7 @@
 						"type": "IntegrationRuntimeReference"
 					},
 					"method": "POST",
+					"body": "Resume",
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com/"
@@ -118,6 +119,7 @@
 						"type": "IntegrationRuntimeReference"
 					},
 					"method": "POST",
+					"body": "Pause",
 					"authentication": {
 						"type": "MSI",
 						"resource": "https://management.azure.com/"

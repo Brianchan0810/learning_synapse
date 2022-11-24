@@ -2,7 +2,7 @@
 	"name": "DailyDataBackupSchedule",
 	"properties": {
 		"annotations": [],
-		"runtimeState": "Stopped",
+		"runtimeState": "Started",
 		"pipelines": [
 			{
 				"pipelineReference": {
@@ -23,7 +23,7 @@
 						20
 					],
 					"hours": [
-						12
+						14
 					]
 				}
 			}

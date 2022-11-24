@@ -10,7 +10,10 @@
 		"typeProperties": {
 			"location": {
 				"type": "AzureBlobFSLocation",
-				"fileName": "consumer_data.csv",
+				"fileName": {
+					"value": "@concat(\n\n    'customer_data_',\n\n    utcnow(),\n\n    '.csv'\n)",
+					"type": "Expression"
+				},
 				"fileSystem": "dev"
 			},
 			"columnDelimiter": ",",

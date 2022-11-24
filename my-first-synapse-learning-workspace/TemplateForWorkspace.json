@@ -899,6 +899,44 @@
 			]
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/DailyDataBackupSchedule')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Started",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "DailySQLPoolBackup",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-11-24T12:20:00",
+						"timeZone": "China Standard Time",
+						"schedule": {
+							"minutes": [
+								20
+							],
+							"hours": [
+								14
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/DailySQLPoolBackup')]"
+			]
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/AutoResolveIntegrationRuntime')]",
 			"type": "Microsoft.Synapse/workspaces/integrationRuntimes",
 			"apiVersion": "2019-06-01-preview",
@@ -1461,18 +1499,6 @@
 			"dependsOn": []
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/DedicatedPool1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
-				"annotations": []
-			},
-			"dependsOn": [],
-			"location": "eastasia"
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/MySparkPool')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
@@ -1498,42 +1524,16 @@
 			"location": "eastasia"
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/DailyDataBackupSchedule')]",
-			"type": "Microsoft.Synapse/workspaces/triggers",
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPool1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
-				"annotations": [],
-				"runtimeState": "Stopped",
-				"pipelines": [
-					{
-						"pipelineReference": {
-							"referenceName": "DailySQLPoolBackup",
-							"type": "PipelineReference"
-						},
-						"parameters": {}
-					}
-				],
-				"type": "ScheduleTrigger",
-				"typeProperties": {
-					"recurrence": {
-						"frequency": "Day",
-						"interval": 1,
-						"startTime": "2022-11-24T12:20:00",
-						"timeZone": "China Standard Time",
-						"schedule": {
-							"minutes": [
-								20
-							],
-							"hours": [
-								12
-							]
-						}
-					}
-				}
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
 			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/pipelines/DailySQLPoolBackup')]"
-			]
+			"dependsOn": [],
+			"location": "eastasia"
 		}
 	]
 }

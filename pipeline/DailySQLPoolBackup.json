@@ -1,0 +1,150 @@
+{
+	"name": "DailySQLPoolBackup",
+	"properties": {
+		"activities": [
+			{
+				"name": "TurnOnSQLPool",
+				"type": "WebActivity",
+				"dependsOn": [],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',pipeline().parameters.SQLPoolName,'/resume?api-version=2019-06-01-preview')",
+						"type": "Expression"
+					},
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "POST",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com/"
+					}
+				}
+			},
+			{
+				"name": "CopyFromSQLpoolToDataLake",
+				"type": "Copy",
+				"dependsOn": [
+					{
+						"activity": "TurnOnSQLPool",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"source": {
+						"type": "SqlDWSource",
+						"queryTimeout": "02:00:00",
+						"partitionOption": "None"
+					},
+					"sink": {
+						"type": "DelimitedTextSink",
+						"storeSettings": {
+							"type": "AzureBlobFSWriteSettings"
+						},
+						"formatSettings": {
+							"type": "DelimitedTextWriteSettings",
+							"quoteAllText": true,
+							"fileExtension": ".txt"
+						}
+					},
+					"enableStaging": false,
+					"translator": {
+						"type": "TabularTranslator",
+						"typeConversion": true,
+						"typeConversionSettings": {
+							"allowDataTruncation": true,
+							"treatBooleanAsNumber": false
+						}
+					}
+				},
+				"inputs": [
+					{
+						"referenceName": "DedicatedPool1_CustomerTable",
+						"type": "DatasetReference"
+					}
+				],
+				"outputs": [
+					{
+						"referenceName": "CSV_Customer_Data_From_SQL_Pool",
+						"type": "DatasetReference"
+					}
+				]
+			},
+			{
+				"name": "TurnOffSQLpool",
+				"type": "WebActivity",
+				"dependsOn": [
+					{
+						"activity": "CopyFromSQLpoolToDataLake",
+						"dependencyConditions": [
+							"Succeeded"
+						]
+					}
+				],
+				"policy": {
+					"timeout": "0.12:00:00",
+					"retry": 0,
+					"retryIntervalInSeconds": 30,
+					"secureOutput": false,
+					"secureInput": false
+				},
+				"userProperties": [],
+				"typeProperties": {
+					"url": {
+						"value": "@concat('https://management.azure.com/subscriptions/',pipeline().parameters.SubscriptionID,'/resourceGroups/',pipeline().parameters.ResourceGroup,'/providers/Microsoft.Synapse/workspaces/',pipeline().parameters.WorkspaceName,'/sqlPools/',pipeline().parameters.SQLPoolName,'/pause?api-version=2019-06-01-preview')",
+						"type": "Expression"
+					},
+					"connectVia": {
+						"referenceName": "AutoResolveIntegrationRuntime",
+						"type": "IntegrationRuntimeReference"
+					},
+					"method": "POST",
+					"authentication": {
+						"type": "MSI",
+						"resource": "https://management.azure.com/"
+					}
+				}
+			}
+		],
+		"parameters": {
+			"ResourceGroup": {
+				"type": "string",
+				"defaultValue": "learningsynapseresourcegrp"
+			},
+			"SubscriptionID": {
+				"type": "string",
+				"defaultValue": "ef6d64e9-c558-4834-b4c6-00d1f4906fb5"
+			},
+			"WorkspaceName": {
+				"type": "string",
+				"defaultValue": "my-first-synapse-learning-workspace"
+			},
+			"SQLPoolName": {
+				"type": "string",
+				"defaultValue": "DedicatedPool1"
+			}
+		},
+		"annotations": [],
+		"lastPublishTime": "2022-11-23T10:02:42Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

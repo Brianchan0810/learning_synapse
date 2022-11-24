@@ -1,0 +1,19 @@
+{
+	"name": "Load SQLPool to DataLake",
+	"properties": {
+		"activities": [
+			{
+				"name": "Wait1",
+				"type": "Wait",
+				"dependsOn": [],
+				"userProperties": [],
+				"typeProperties": {
+					"waitTimeInSeconds": 1
+				}
+			}
+		],
+		"annotations": [],
+		"lastPublishTime": "2022-11-23T10:18:36Z"
+	},
+	"type": "Microsoft.Synapse/workspaces/pipelines"
+}

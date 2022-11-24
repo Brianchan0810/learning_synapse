@@ -1,0 +1,80 @@
+{
+	"name": "DedicatedPool1_CustomerTable",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer",
+			"type": "LinkedServiceReference",
+			"parameters": {
+				"DBName": "DedicatedPool1"
+			}
+		},
+		"annotations": [],
+		"type": "AzureSqlDWTable",
+		"schema": [
+			{
+				"name": "contract_no",
+				"type": "nvarchar"
+			},
+			{
+				"name": "account_no",
+				"type": "nvarchar"
+			},
+			{
+				"name": "last_name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "first_name",
+				"type": "nvarchar"
+			},
+			{
+				"name": "gender",
+				"type": "nvarchar"
+			},
+			{
+				"name": "phone_no",
+				"type": "decimal",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "hkid",
+				"type": "nvarchar"
+			},
+			{
+				"name": "duration",
+				"type": "decimal",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "monthly_charge",
+				"type": "decimal",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "voucher_amount",
+				"type": "decimal",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "contract_sum",
+				"type": "decimal",
+				"precision": 19,
+				"scale": 4
+			},
+			{
+				"name": "gender_totalsum_rank",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "Customer"
+		}
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

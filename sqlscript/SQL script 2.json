@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 2",
+	"properties": {
+		"content": {
+			"query": " CREATE TABLE [dbo].[Customer]\n (\n     [contract_no] NVARCHAR(4000),\n     [account_no] NVARCHAR(4000),\n     [last_name] NVARCHAR(4000),\n     [first_name] NVARCHAR(4000),\n     [gender] NVARCHAR(4000),\n     [phone_no] NUMERIC(19,4),\n     [hkid] NVARCHAR(4000),\n     [duration] NUMERIC(19,4),\n     [monthly_charge] NUMERIC(19,4),\n     [voucher_amount] NUMERIC(19,4),\n     [contract_sum]  NUMERIC(19,4),\n     [gender_totalsum_rank] INT\n )\n WITH\n (\n     DISTRIBUTION = HASH ( [contract_no] ),\n     CLUSTERED COLUMNSTORE INDEX\n )",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "DedicatedPool1",
+				"poolName": "DedicatedPool1"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}

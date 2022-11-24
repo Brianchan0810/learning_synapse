@@ -1,0 +1,70 @@
+{
+	"name": "Personal_info_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "my-first-synapse-learning-workspace-WorkspaceDefaultStorage",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "personal_info.parquet",
+				"fileSystem": "users"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "account_no",
+				"type": "UTF8"
+			},
+			{
+				"name": "last_name",
+				"type": "UTF8"
+			},
+			{
+				"name": "first_name",
+				"type": "UTF8"
+			},
+			{
+				"name": "hkid",
+				"type": "UTF8"
+			},
+			{
+				"name": "contact_no",
+				"type": "INT64"
+			},
+			{
+				"name": "date_of_birth",
+				"type": "TIMESTAMP_MICROS"
+			},
+			{
+				"name": "gender",
+				"type": "UTF8"
+			},
+			{
+				"name": "email",
+				"type": "UTF8"
+			},
+			{
+				"name": "mail_district",
+				"type": "UTF8"
+			},
+			{
+				"name": "home_address",
+				"type": "UTF8"
+			},
+			{
+				"name": "work_address",
+				"type": "UTF8"
+			},
+			{
+				"name": "industry",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

@@ -1,0 +1,341 @@
+{
+	"name": "Notebook 1",
+	"properties": {
+		"nbformat": 4,
+		"nbformat_minor": 2,
+		"bigDataPool": {
+			"referenceName": "MySparkPool",
+			"type": "BigDataPoolReference"
+		},
+		"sessionProperties": {
+			"driverMemory": "28g",
+			"driverCores": 4,
+			"executorMemory": "28g",
+			"executorCores": 4,
+			"numExecutors": 2,
+			"runAsWorkspaceSystemIdentity": false,
+			"conf": {
+				"spark.dynamicAllocation.enabled": "false",
+				"spark.dynamicAllocation.minExecutors": "2",
+				"spark.dynamicAllocation.maxExecutors": "2",
+				"spark.autotune.trackingId": "a61c68ee-1cfd-4c6f-958b-3c98c2775428"
+			}
+		},
+		"metadata": {
+			"saveOutput": true,
+			"synapse_widget": {
+				"version": "0.1",
+				"state": {
+					"4abac0a0-4e1e-4b2b-9347-33367f5cb585": {
+						"type": "Synapse.DataFrame",
+						"sync_state": {
+							"table": {
+								"rows": [
+									{
+										"0": "AC0001",
+										"1": "Lam",
+										"2": "Tai Kwang",
+										"3": "P458129(8)",
+										"4": "69517582",
+										"5": "1992-03-12 00:00:00",
+										"6": "M",
+										"7": "Ella810@gmail.com",
+										"8": "Kwai Tsing ",
+										"9": "Home Addr 1",
+										"10": "Work Addr 1",
+										"11": "Education"
+									},
+									{
+										"0": "AC0002",
+										"1": "Chan",
+										"2": "Yiu Ting",
+										"3": "A133397(8)",
+										"4": "68379563",
+										"5": "1952-08-26 00:00:00",
+										"6": "M",
+										"7": "Jack248@gmail.com",
+										"8": "Sha Tin",
+										"9": "Home Addr 2",
+										"10": "Work Addr 2",
+										"11": "Engineering"
+									},
+									{
+										"0": "AC0003",
+										"1": "Wu",
+										"2": "Ka hei",
+										"3": "P211771(9)",
+										"4": "80874823",
+										"5": "1982-11-02 00:00:00",
+										"6": "M",
+										"7": "Grayson564@gmail.com",
+										"8": "Eastern",
+										"9": "Home Addr 3",
+										"10": "Work Addr 3",
+										"11": "Retail"
+									},
+									{
+										"0": "AC0004",
+										"1": "Tsang",
+										"2": "Fong Wang",
+										"3": "X650820(8)",
+										"4": "56859529",
+										"5": "1948-06-13 00:00:00",
+										"6": "F",
+										"7": "Scarlett164@gmail.com",
+										"8": "Wan Chai",
+										"9": "Home Addr 4",
+										"10": "Work Addr 4",
+										"11": "Retired"
+									},
+									{
+										"0": "AC0005",
+										"1": "Ho",
+										"2": "Oi Fai",
+										"3": "A545244(6)",
+										"4": "87093607",
+										"5": "1977-09-26 00:00:00",
+										"6": "M",
+										"7": "Carter125@gmail.com",
+										"8": "Kwai Tsing",
+										"9": "Home Addr 5",
+										"10": "Work Addr 5",
+										"11": "Business"
+									},
+									{
+										"0": "AC0006",
+										"1": "Ng",
+										"2": "Siu Yueng",
+										"3": "B917996(6)",
+										"4": "64225641",
+										"5": "2000-12-03 00:00:00",
+										"6": "F",
+										"7": "Hazel446@gmail.com",
+										"8": "Sham Shui Po",
+										"9": "Home Addr 6",
+										"10": "Work Addr 6",
+										"11": "Student"
+									},
+									{
+										"0": "AC0007",
+										"1": "Lam",
+										"2": "Mei Ching",
+										"3": "Z737392(7)",
+										"4": "85493822",
+										"5": "1993-04-17 00:00:00",
+										"6": "F",
+										"7": "Hudson499@gmail.com",
+										"8": "Central and West",
+										"9": "Home Addr 7",
+										"10": "Work Addr 7",
+										"11": "IT"
+									},
+									{
+										"0": "AC0008",
+										"1": "Tsang",
+										"2": "Ka Ming",
+										"3": "Y717732(2)",
+										"4": "56556296",
+										"5": "1983-06-23 00:00:00",
+										"6": "M",
+										"7": "Willow627@gmail.com",
+										"8": "Eastern",
+										"9": "Home Addr 8",
+										"10": "Work Addr 8",
+										"11": "Engineering"
+									},
+									{
+										"0": "AC0009",
+										"1": "Wu",
+										"2": "Dong Hei",
+										"3": "A140657(1)",
+										"4": "64022282",
+										"5": "1988-02-13 00:00:00",
+										"6": "F",
+										"7": "Madison772@gmail.com",
+										"8": "Sham Shui Po",
+										"9": "Home Addr 9",
+										"10": "Work Addr 9",
+										"11": "IT"
+									},
+									{
+										"0": "AC0010",
+										"1": "Lam",
+										"2": "Shui Sing",
+										"3": "B431844(5)",
+										"4": "70162028",
+										"5": "1963-07-20 00:00:00",
+										"6": "F",
+										"7": "Maverick117@gmail.com",
+										"8": "Eastern",
+										"9": "Home Addr 10",
+										"10": "Work Addr 10",
+										"11": "Education"
+									}
+								],
+								"schema": [
+									{
+										"key": "0",
+										"name": "account_no",
+										"type": "string"
+									},
+									{
+										"key": "1",
+										"name": "last_name",
+										"type": "string"
+									},
+									{
+										"key": "2",
+										"name": "first_name",
+										"type": "string"
+									},
+									{
+										"key": "3",
+										"name": "hkid",
+										"type": "string"
+									},
+									{
+										"key": "4",
+										"name": "contact_no",
+										"type": "bigint"
+									},
+									{
+										"key": "5",
+										"name": "date_of_birth",
+										"type": "timestamp"
+									},
+									{
+										"key": "6",
+										"name": "gender",
+										"type": "string"
+									},
+									{
+										"key": "7",
+										"name": "email",
+										"type": "string"
+									},
+									{
+										"key": "8",
+										"name": "mail_district",
+										"type": "string"
+									},
+									{
+										"key": "9",
+										"name": "home_address",
+										"type": "string"
+									},
+									{
+										"key": "10",
+										"name": "work_address",
+										"type": "string"
+									},
+									{
+										"key": "11",
+										"name": "industry",
+										"type": "string"
+									}
+								],
+								"truncated": false
+							},
+							"isSummary": false,
+							"language": "scala"
+						},
+						"persist_state": {
+							"view": {
+								"type": "details",
+								"chartOptions": {
+									"chartType": "bar",
+									"aggregationType": "sum",
+									"categoryFieldKeys": [
+										"0"
+									],
+									"seriesFieldKeys": [
+										"4"
+									],
+									"isStacked": false
+								}
+							}
+						}
+					}
+				}
+			},
+			"enableDebugMode": false,
+			"kernelspec": {
+				"name": "synapse_pyspark",
+				"display_name": "Synapse PySpark"
+			},
+			"language_info": {
+				"name": "python"
+			},
+			"a365ComputeOptions": {
+				"id": "/subscriptions/ef6d64e9-c558-4834-b4c6-00d1f4906fb5/resourceGroups/learningsynapseresourcegrp/providers/Microsoft.Synapse/workspaces/my-first-synapse-learning-workspace/bigDataPools/MySparkPool",
+				"name": "MySparkPool",
+				"type": "Spark",
+				"endpoint": "https://my-first-synapse-learning-workspace.dev.azuresynapse.net/livyApi/versions/2019-11-01-preview/sparkPools/MySparkPool",
+				"auth": {
+					"type": "AAD",
+					"authResource": "https://dev.azuresynapse.net",
+					"authHeader": null
+				},
+				"sparkVersion": "3.2",
+				"nodeCount": 10,
+				"cores": 4,
+				"memory": 28,
+				"extraHeader": null
+			},
+			"sessionKeepAliveTimeout": 30
+		},
+		"cells": [
+			{
+				"cell_type": "code",
+				"metadata": {
+					"microsoft": {
+						"language": "python"
+					},
+					"collapsed": false
+				},
+				"source": [
+					"%%pyspark\r\n",
+					"df = spark.read.load('abfss://users@datalakeforlearningasa.dfs.core.windows.net/personal_info.parquet', format='parquet')\r\n",
+					"display(df.limit(10))"
+				],
+				"execution_count": 3
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					"spark.sql(\"CREATE DATABASE IF NOT EXISTS sparkdb\")\r\n",
+					"df.write.mode(\"overwrite\").saveAsTable(\"sparkdb.personalinfo\")"
+				],
+				"execution_count": 4
+			},
+			{
+				"cell_type": "code",
+				"metadata": {
+					"jupyter": {
+						"source_hidden": false,
+						"outputs_hidden": false
+					},
+					"nteract": {
+						"transient": {
+							"deleting": false
+						}
+					}
+				},
+				"source": [
+					""
+				]
+			}
+		]
+	}
+}

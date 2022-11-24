@@ -1,0 +1,82 @@
+{
+	"name": "Contract_dataset",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "ls_another_datalake",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "Parquet",
+		"typeProperties": {
+			"location": {
+				"type": "AzureBlobFSLocation",
+				"fileName": "contracts.parquet",
+				"fileSystem": "employees"
+			},
+			"compressionCodec": "snappy"
+		},
+		"schema": [
+			{
+				"name": "contract_no",
+				"type": "UTF8"
+			},
+			{
+				"name": "account_no",
+				"type": "UTF8"
+			},
+			{
+				"name": "phone_no",
+				"type": "INT64"
+			},
+			{
+				"name": "plan_type",
+				"type": "UTF8"
+			},
+			{
+				"name": "plan_id",
+				"type": "UTF8"
+			},
+			{
+				"name": "handset_model",
+				"type": "UTF8"
+			},
+			{
+				"name": "voucher_amount",
+				"type": "DOUBLE"
+			},
+			{
+				"name": "duration",
+				"type": "INT64"
+			},
+			{
+				"name": "contract_start_date",
+				"type": "TIMESTAMP_MICROS"
+			},
+			{
+				"name": "contract_end_date",
+				"type": "TIMESTAMP_MICROS"
+			},
+			{
+				"name": "monthly_charge",
+				"type": "INT64"
+			},
+			{
+				"name": "voice_cap",
+				"type": "INT64"
+			},
+			{
+				"name": "data_cap",
+				"type": "INT64"
+			},
+			{
+				"name": "data_speed",
+				"type": "UTF8"
+			},
+			{
+				"name": "agent_name",
+				"type": "UTF8"
+			}
+		]
+	},
+	"type": "Microsoft.Synapse/workspaces/datasets"
+}

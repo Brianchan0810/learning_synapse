@@ -1,0 +1,139 @@
+{
+	"name": "ExtractFromDataLakeLoadToSQLpool",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"dataset": {
+						"referenceName": "Contract_dataset",
+						"type": "DatasetReference"
+					},
+					"name": "ContractDataset"
+				},
+				{
+					"dataset": {
+						"referenceName": "Personal_info_dataset",
+						"type": "DatasetReference"
+					},
+					"name": "PersonalInfoDataset"
+				}
+			],
+			"sinks": [
+				{
+					"dataset": {
+						"referenceName": "DedicatedPool1_CustomerTable",
+						"type": "DatasetReference"
+					},
+					"name": "sink1"
+				}
+			],
+			"transformations": [
+				{
+					"name": "ContractJoinPersonal"
+				},
+				{
+					"name": "SelectTargetColumn"
+				},
+				{
+					"name": "ContractSum"
+				},
+				{
+					"name": "GenderContractSumRank"
+				}
+			],
+			"scriptLines": [
+				"source(output(",
+				"          contract_no as string,",
+				"          account_no as string,",
+				"          phone_no as long,",
+				"          plan_type as string,",
+				"          plan_id as string,",
+				"          handset_model as string,",
+				"          voucher_amount as double,",
+				"          duration as long,",
+				"          contract_start_date as timestamp,",
+				"          contract_end_date as timestamp,",
+				"          monthly_charge as long,",
+				"          voice_cap as long,",
+				"          data_cap as long,",
+				"          data_speed as string,",
+				"          agent_name as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> ContractDataset",
+				"source(output(",
+				"          account_no as string,",
+				"          last_name as string,",
+				"          first_name as string,",
+				"          hkid as string,",
+				"          contact_no as long,",
+				"          date_of_birth as timestamp,",
+				"          gender as string,",
+				"          email as string,",
+				"          mail_district as string,",
+				"          home_address as string,",
+				"          work_address as string,",
+				"          industry as string",
+				"     ),",
+				"     allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     ignoreNoFilesFound: false,",
+				"     format: 'parquet') ~> PersonalInfoDataset",
+				"ContractDataset, PersonalInfoDataset join(ContractDataset@account_no == PersonalInfoDataset@account_no,",
+				"     joinType:'inner',",
+				"     matchType:'exact',",
+				"     ignoreSpaces: false,",
+				"     broadcast: 'auto')~> ContractJoinPersonal",
+				"ContractJoinPersonal select(mapColumn(",
+				"          contract_no,",
+				"          account_no = ContractDataset@account_no,",
+				"          last_name,",
+				"          first_name,",
+				"          gender,",
+				"          phone_no,",
+				"          hkid,",
+				"          duration,",
+				"          monthly_charge,",
+				"          voucher_amount",
+				"     ),",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true) ~> SelectTargetColumn",
+				"SelectTargetColumn derive(contract_sum = monthly_charge*duration) ~> ContractSum",
+				"ContractSum window(over(gender),",
+				"     desc(contract_sum, true),",
+				"     gender_TotalSum_Rank = rank()) ~> GenderContractSumRank",
+				"GenderContractSumRank sink(allowSchemaDrift: true,",
+				"     validateSchema: false,",
+				"     input(",
+				"          contract_no as string,",
+				"          account_no as string,",
+				"          last_name as string,",
+				"          first_name as string,",
+				"          gender as string,",
+				"          phone_no as decimal(19,4),",
+				"          hkid as string,",
+				"          duration as decimal(19,4),",
+				"          monthly_charge as decimal(19,4),",
+				"          voucher_amount as decimal(19,4),",
+				"          contract_sum as decimal(19,4),",
+				"          gender_totalsum_rank as integer",
+				"     ),",
+				"     deletable:false,",
+				"     insertable:true,",
+				"     updateable:false,",
+				"     upsertable:false,",
+				"     format: 'table',",
+				"     staged: true,",
+				"     skipDuplicateMapInputs: true,",
+				"     skipDuplicateMapOutputs: true,",
+				"     saveOrder: 1,",
+				"     errorHandlingOption: 'stopOnFirstError',",
+				"     preCommands: [],",
+				"     postCommands: []) ~> sink1"
+			]
+		}
+	}
+}

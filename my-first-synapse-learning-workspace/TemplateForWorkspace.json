@@ -1496,6 +1496,44 @@
 			},
 			"dependsOn": [],
 			"location": "eastasia"
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/DailyDataBackupSchedule')]",
+			"type": "Microsoft.Synapse/workspaces/triggers",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"runtimeState": "Stopped",
+				"pipelines": [
+					{
+						"pipelineReference": {
+							"referenceName": "DailySQLPoolBackup",
+							"type": "PipelineReference"
+						},
+						"parameters": {}
+					}
+				],
+				"type": "ScheduleTrigger",
+				"typeProperties": {
+					"recurrence": {
+						"frequency": "Day",
+						"interval": 1,
+						"startTime": "2022-11-24T12:20:00",
+						"timeZone": "China Standard Time",
+						"schedule": {
+							"minutes": [
+								20
+							],
+							"hours": [
+								12
+							]
+						}
+					}
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/pipelines/DailySQLPoolBackup')]"
+			]
 		}
 	]
 }

@@ -5,6 +5,9 @@
 		"workspaceName": {
 			"value": "my-first-synapse-learning-workspace"
 		},
+		"AzureSqlDB_database01_connectionString": {
+			"value": ""
+		},
 		"ls_another_datalake_accountKey": {
 			"value": ""
 		},

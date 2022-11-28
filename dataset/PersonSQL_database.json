@@ -1,0 +1,30 @@
+{
+	"name": "PersonSQL_database",
+	"properties": {
+		"linkedServiceName": {
+			"referenceName": "AzureSqlDB_database01",
+			"type": "LinkedServiceReference"
+		},
+		"annotations": [],
+		"type": "AzureSqlTable",
+		"schema": [
+			{
+				"name": "FirstName",
+				"type": "varchar"
+			},
+			{
+				"name": "LastName",
+				"type": "varchar"
+			},
+			{
+				"name": "Age",
+				"type": "int",
+				"precision": 10
+			}
+		],
+		"typeProperties": {
+			"schema": "dbo",
+			"table": "persons"
+		}
+	}
+}

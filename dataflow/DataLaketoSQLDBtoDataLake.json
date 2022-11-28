@@ -1,0 +1,19 @@
+{
+	"name": "DataLaketoSQLDBtoDataLake",
+	"properties": {
+		"type": "MappingDataFlow",
+		"typeProperties": {
+			"sources": [
+				{
+					"name": "PersonDataCSV"
+				}
+			],
+			"sinks": [],
+			"transformations": [],
+			"scriptLines": [
+				"source(allowSchemaDrift: true,",
+				"     validateSchema: false) ~> PersonDataCSV"
+			]
+		}
+	}
+}

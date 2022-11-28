@@ -19,6 +19,10 @@
 			"type": "secureString",
 			"metadata": "Secure string for 'connectionString' of 'my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer'"
 		},
+		"KeyValutLS_properties_typeProperties_baseUrl": {
+			"type": "string",
+			"defaultValue": "https://brian-keyvault-202211.vault.azure.net/"
+		},
 		"ls_another_datalake_properties_typeProperties_url": {
 			"type": "string",
 			"defaultValue": "https://learningazurestorageac.dfs.core.windows.net/"
@@ -1131,6 +1135,14 @@
 				"type": "AzureSqlDatabase",
 				"typeProperties": {
 					"connectionString": "[parameters('AzureSqlDB_database01_connectionString')]",
+					"password": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "KeyValutLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "SQLDatabasePW"
+					},
 					"alwaysEncryptedSettings": {
 						"alwaysEncryptedAkvAuthType": "ManagedIdentity"
 					}
@@ -1141,8 +1153,22 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]"
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/linkedServices/KeyValutLS')]"
 			]
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/KeyValutLS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureKeyVault",
+				"typeProperties": {
+					"baseUrl": "[parameters('KeyValutLS_properties_typeProperties_baseUrl')]"
+				}
+			},
+			"dependsOn": []
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/ls_another_datalake')]",

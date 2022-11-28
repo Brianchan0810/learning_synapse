@@ -14,6 +14,9 @@
 		"my-first-synapse-learning-workspace-WorkspaceDefaultSqlServer_connectionString": {
 			"value": ""
 		},
+		"KeyValutLS_properties_typeProperties_baseUrl": {
+			"value": "https://brian-keyvault-202211.vault.azure.net/"
+		},
 		"ls_another_datalake_properties_typeProperties_url": {
 			"value": "https://learningazurestorageac.dfs.core.windows.net/"
 		},

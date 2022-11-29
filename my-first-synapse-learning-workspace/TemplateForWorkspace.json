@@ -7,10 +7,6 @@
 			"metadata": "Workspace name",
 			"defaultValue": "my-first-synapse-learning-workspace"
 		},
-		"AzureSqlDB_database01_connectionString": {
-			"type": "secureString",
-			"metadata": "Secure string for 'connectionString' of 'AzureSqlDB_database01'"
-		},
 		"ls_another_datalake_accountKey": {
 			"type": "secureString",
 			"metadata": "Secure string for 'accountKey' of 'ls_another_datalake'"
@@ -22,6 +18,10 @@
 		"KeyValutLS_properties_typeProperties_baseUrl": {
 			"type": "string",
 			"defaultValue": "https://brian-keyvault-202211.vault.azure.net/"
+		},
+		"SQLdb_database01_LS_properties_typeProperties_connectionString_secretName": {
+			"type": "string",
+			"defaultValue": "SQL-Database01-connection-str"
 		},
 		"ls_another_datalake_properties_typeProperties_url": {
 			"type": "string",
@@ -982,7 +982,7 @@
 			"apiVersion": "2019-06-01-preview",
 			"properties": {
 				"linkedServiceName": {
-					"referenceName": "AzureSqlDB_database01",
+					"referenceName": "SQLdb_database01_LS",
 					"type": "LinkedServiceReference"
 				},
 				"annotations": [],
@@ -1008,7 +1008,7 @@
 				}
 			},
 			"dependsOn": [
-				"[concat(variables('workspaceId'), '/linkedServices/AzureSqlDB_database01')]"
+				"[concat(variables('workspaceId'), '/linkedServices/SQLdb_database01_LS')]"
 			]
 		},
 		{
@@ -1127,37 +1127,6 @@
 			]
 		},
 		{
-			"name": "[concat(parameters('workspaceName'), '/AzureSqlDB_database01')]",
-			"type": "Microsoft.Synapse/workspaces/linkedServices",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"annotations": [],
-				"type": "AzureSqlDatabase",
-				"typeProperties": {
-					"connectionString": "[parameters('AzureSqlDB_database01_connectionString')]",
-					"password": {
-						"type": "AzureKeyVaultSecret",
-						"store": {
-							"referenceName": "KeyValutLS",
-							"type": "LinkedServiceReference"
-						},
-						"secretName": "SQLDatabasePW"
-					},
-					"alwaysEncryptedSettings": {
-						"alwaysEncryptedAkvAuthType": "ManagedIdentity"
-					}
-				},
-				"connectVia": {
-					"referenceName": "AutoResolveIntegrationRuntime",
-					"type": "IntegrationRuntimeReference"
-				}
-			},
-			"dependsOn": [
-				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
-				"[concat(variables('workspaceId'), '/linkedServices/KeyValutLS')]"
-			]
-		},
-		{
 			"name": "[concat(parameters('workspaceName'), '/KeyValutLS')]",
 			"type": "Microsoft.Synapse/workspaces/linkedServices",
 			"apiVersion": "2019-06-01-preview",
@@ -1169,6 +1138,33 @@
 				}
 			},
 			"dependsOn": []
+		},
+		{
+			"name": "[concat(parameters('workspaceName'), '/SQLdb_database01_LS')]",
+			"type": "Microsoft.Synapse/workspaces/linkedServices",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"annotations": [],
+				"type": "AzureSqlDatabase",
+				"typeProperties": {
+					"connectionString": {
+						"type": "AzureKeyVaultSecret",
+						"store": {
+							"referenceName": "KeyValutLS",
+							"type": "LinkedServiceReference"
+						},
+						"secretName": "[parameters('SQLdb_database01_LS_properties_typeProperties_connectionString_secretName')]"
+					}
+				},
+				"connectVia": {
+					"referenceName": "AutoResolveIntegrationRuntime",
+					"type": "IntegrationRuntimeReference"
+				}
+			},
+			"dependsOn": [
+				"[concat(variables('workspaceId'), '/integrationRuntimes/AutoResolveIntegrationRuntime')]",
+				"[concat(variables('workspaceId'), '/linkedServices/KeyValutLS')]"
+			]
 		},
 		{
 			"name": "[concat(parameters('workspaceName'), '/ls_another_datalake')]",
@@ -1827,6 +1823,18 @@
 			"dependsOn": []
 		},
 		{
+			"name": "[concat(parameters('workspaceName'), '/DedicatedPool1')]",
+			"type": "Microsoft.Synapse/workspaces/sqlPools",
+			"apiVersion": "2019-06-01-preview",
+			"properties": {
+				"collation": "SQL_Latin1_General_CP1_CI_AS",
+				"maxSizeBytes": 263882790666240,
+				"annotations": []
+			},
+			"dependsOn": [],
+			"location": "eastasia"
+		},
+		{
 			"name": "[concat(parameters('workspaceName'), '/MySparkPool')]",
 			"type": "Microsoft.Synapse/workspaces/bigDataPools",
 			"apiVersion": "2019-06-01-preview",
@@ -1846,18 +1854,6 @@
 				"sparkVersion": "3.2",
 				"isComputeIsolationEnabled": false,
 				"sessionLevelPackagesEnabled": false,
-				"annotations": []
-			},
-			"dependsOn": [],
-			"location": "eastasia"
-		},
-		{
-			"name": "[concat(parameters('workspaceName'), '/DedicatedPool1')]",
-			"type": "Microsoft.Synapse/workspaces/sqlPools",
-			"apiVersion": "2019-06-01-preview",
-			"properties": {
-				"collation": "SQL_Latin1_General_CP1_CI_AS",
-				"maxSizeBytes": 263882790666240,
 				"annotations": []
 			},
 			"dependsOn": [],

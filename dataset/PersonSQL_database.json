@@ -2,7 +2,7 @@
 	"name": "PersonSQL_database",
 	"properties": {
 		"linkedServiceName": {
-			"referenceName": "AzureSqlDB_database01",
+			"referenceName": "SQLdb_database01_LS",
 			"type": "LinkedServiceReference"
 		},
 		"annotations": [],

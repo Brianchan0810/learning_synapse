@@ -1,0 +1,17 @@
+{
+	"name": "SQL script 4",
+	"properties": {
+		"content": {
+			"query": "\nSELECT TOP (100) [contract_no]\n,[account_no]\n,[last_name]\n,[first_name]\n,[gender]\n,[phone_no]\n,[hkid]\n,[duration]\n,[monthly_charge]\n,[voucher_amount]\n,[contract_sum]\n,[gender_totalsum_rank]\n FROM [dbo].[Customer]",
+			"metadata": {
+				"language": "sql"
+			},
+			"currentConnection": {
+				"databaseName": "DedicatedPool1",
+				"poolName": "DedicatedPool1"
+			},
+			"resultLimit": 5000
+		},
+		"type": "SqlQuery"
+	}
+}
